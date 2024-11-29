@@ -258,7 +258,7 @@ def join_a_game(server_socket, client_address, data):
                     users.loc[users["ID"] == client["id"], "ALL_TIME_ROUNDS"] += 1
                     server_socket.sendto(response.encode(), clients_addresses)
 
-            time.sleep(10)
+            time.sleep(60)
             for clients_addresses in client_states.keys():
                 if client_states[clients_addresses]["step"] == "game_waiting" or client_states[clients_addresses]["step"] == "in_game":
                     server_socket.sendto(question.encode(), clients_addresses)
@@ -325,11 +325,12 @@ def join_a_game(server_socket, client_address, data):
         number_of_answers = 0
         question, answer = questions_set_all(random.randint(1, 40))
 
-        time.sleep(10)
+        time.sleep(60)
         for clients_addresses in client_states.keys():
             if client_states[clients_addresses]["step"] == "game_waiting" or client_states[clients_addresses]["step"] == "in_game":
                 server_socket.sendto(question.encode(), clients_addresses)
 
+# Main menu
 def menu(server_socket, client_address, op):
     client = client_states[client_address]
     header_message = ""
@@ -337,35 +338,41 @@ def menu(server_socket, client_address, op):
         header_message = f"Welcome {client["id"]}, Log_in Operation Succeeded\n"
     if op == 2:
         header_message = f"Welcome {client["id"]}, sign_up Operation Succeeded\n"
-    starting_message = "Welcome to Nabeels_Game (: \nPlease Enter an option \n1- Log_In \n2- Sign_up \n3- Join a game \n4- Game_Descriptions\n5- Quit"
+    starting_message = "Welcome to our game (: \nPlease Enter an option \n1- Log_In \n2- Sign_up \n3- Join a game \n4- Game_Descriptions\n5- Quit"
     header_message += starting_message
     server_socket.sendto(header_message.encode(), client_address)
 
+# Function to handle Each client request
 def handle_client(server_socket, client_address, data):
-    if client_address not in client_states:
+    if client_address not in client_states: # if the request we got for new client
         client_states[client_address] = {"step": "menu", "option": None, "id": f"anonymous{len(client_states)}", "pass": None, "points": 0, "time_out": 0}
         print(f"Client with Address {client_address} has joined the game")
 
-    client = client_states[client_address]
+    client = client_states[client_address] # get a pointer for client with KEY: client_address
 
+    # if the client in first step "menu", display the main menu then return "NONE" to wait for response
     if client["step"] == "menu":
         menu(server_socket, client_address, 0)
         client["step"] = "option"
         return None
 
-    if client["step"] == "option":
+    if client["step"] == "option": # if client step is waiting for response after displaying the main menu, make the next received data is the option
         client["option"] = data
 
-    if client["option"] == "1":
+    if client["option"] == "1": # if option one go to log in function
         log_in(server_socket, client_address, data)
 
-    elif client["option"] == "2":
+    elif client["option"] == "2": # if option two go to sign in function
         sign_up(server_socket, client_address, data)
 
-    elif client["option"] == "3":
+    elif client["option"] == "3": # if option three go to start game function
         join_a_game(server_socket, client_address, data)
 
-    elif client["option"] == "4":
+    elif client["option"] == "4": # if option 4 display the game description
+        # note for '0' in the starting of the response the client will know it's a just to display ont for wait for response
+        description = "0This is interactive multiplayer trivia game which needs two players at least to start the game,\n every client will go in three rounds of randoms question that will test your knowledge on the end\n of each round you will receive message of how many points you have and if answered correctly,\n or not. But beware even if the player answers correctly\n only the first player to answer correctly will win the higher point.\n HOPE YOU ENJOY PLAYING!!!!\n"
+        server_socket.sendto(description.encode(), client_address)
+        menu(server_socket, client_address, 0)
         pass
 
     elif client["option"] == "5" :
@@ -379,17 +386,17 @@ def handle_client(server_socket, client_address, data):
 
 def protocol_listener():
 
-        try:
-            server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            server_socket.bind((SERVER, PORT))
-            print(f"UDP server is listening on {SERVER}:{PORT}")
-            try:
+        try: # any exception here means that the server failed to connect
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # create the server socket with the family and type
+            server_socket.bind((SERVER, PORT)) # bind to the socket the IP address and Port number
+            print(f"UDP server is listening on {SERVER}:{PORT}") # display on the server terminal
+            try: # any exception here means that the server shut down ( the while true ends )
                 while True:
-                    try:
-                        data, client_address = server_socket.recvfrom(1024)
+                    try: # any exception here means that an error occur during handle the client request
+                        data, client_address = server_socket.recvfrom(1024) # receiving the data
                         print(f"Received from {client_address}:   {data.decode()}")
-                        data = data.decode()
-                        handle_client(server_socket, client_address, data)
+                        data = data.decode() # decode the received data
+                        handle_client(server_socket, client_address, data) # handle ir in handle_client
                     except Exception:
                         print("Server receive a request that didn't accept")
                         continue

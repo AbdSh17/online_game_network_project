@@ -33,7 +33,7 @@ def send_request():
             flag = False
             message = input("Enter a response: ")
             client_socket.sendto(message.encode(), (SERVER, PORT))
-            print(f"{message} sent to {SERVER}:{PORT}\n\n")
+            print(f"{message} sent to {SERVER}:{PORT}\n")
 
         elif response[0] == "1":
             input_result = []
@@ -59,7 +59,7 @@ def send_request():
             break
 
         if response[0] == "0" or response[0] == "1":
-            print(f"{response[1:]}\n")
+            print(f"{response[1:]}")
         else:
             print(f"Response from Serve: {response}")
 
