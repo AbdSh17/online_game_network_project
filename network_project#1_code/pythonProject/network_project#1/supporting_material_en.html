@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Supporting Material</title>
+    <link rel="stylesheet" href="./supporting_material_en.css" />
+</head>
+
+<body>
+    <div class="all"> 
+        <h1>Request Supporting Material</h1>
+        <form action="/" method="POST">
+            <label>Enter topic</label>
+            <input type="text" id="name" name="name" required>
+            <div>
+                <label for="type">Select type:</label>
+                <select id="type" name="type">
+                    <option id="image">Image</option>
+                    <option id="video">Video</option>
+                </select>
+                <div>
+                    <button type="submit">Submit</button>
+        </form>
+        
+        <div class="image">
+            <img style="display: none;" width="640" height="360" src="./photos/p2p.jpg" alt="p2p">
+        </div>
+        
+        <div class="video_1">
+            <video style="display: none;" width="640" height="360" src="./Videos/What_Is_p2p.mp4" alt="what_is_p2p">
+        </div>
+        
+        <div class="video_2">
+            <video style="display: none;" width="640" height="360" src="./Videos/How_peer_to_peer_works.mp4" alt="how_p2p_work">
+        </div>
+    </div>
+
+</body>
+
+</html>
